@@ -12,6 +12,8 @@
  *   - add each card's HTML to the page
  */
 
+let time;
+
 
 const deckContainer = document.querySelector('.deck');
 shuffle(deck);
@@ -20,7 +22,7 @@ let openCardsArray = [];
 
 
 function start(){
-for (card of deck){
+for (let card of deck){
     
     //Displaying Cards
 
@@ -38,24 +40,32 @@ for (card of deck){
             openCards(x);
         }
     })
-    timer();
 }
+timer();
 }
 
 let moves = 0;
 const movesElement = document.querySelector('.moves');
+const cards = document.getElementsByClassName("card");
 
 function openCards(card){
     
     //Check if cards match
 
-    if(openCardsArray.length == 2){
+if(openCardsArray.length == 2){
+        for (let card of cards) {
+            card.classList.add("disable");
+        }
         if(openCardsArray[0].innerHTML == openCardsArray[1].innerHTML){
             openCardsArray[0].className = 'card open show match disable'
             openCardsArray[1].className = 'card open show match disable'
+            for (let card of cards) {
+                if (!card.classList.contains("match")) {
+                    card.className = "card";
+                }}
             openCardsArray = [];
             if(document.querySelectorAll('.match').length == 16){
-            EndOfGame();
+            setTimeout(EndOfGame,500);
             }
         }
         else{
@@ -72,6 +82,11 @@ function openCards(card){
 function closeCard(){
     openCardsArray[0].className = 'card';
     openCardsArray[1].className = 'card';
+    for (let card of cards) {
+        if (!card.classList.contains("match")) {
+            card.classList.remove("disable");
+        }
+    }
     openCardsArray = [];
 }
 
@@ -86,13 +101,9 @@ function rate(){
         RemoveStar();
         rating = "2 Stars";
     }
-    if(moves == 15){
-        RemoveStar();
-        rating = "1 Star";
-    }
     if(moves == 17){
         RemoveStar();
-        rating = "No Stars";
+        rating = "1 Star";
     }
 }
 
@@ -110,24 +121,14 @@ function shuffle(array) {
 
     return array;
 }
+let timerElement = document.querySelector('.timer');
 
 function EndOfGame() {
-        confirm(`Congratulations! you have completed the game!
-         Time: ${timerElement.innerHTML} Moves: ${moves} Rating: ${rating}! do you want to play again?`)    
+    if(confirm(`Congratulations! you have completed the game!
+     Time: ${timerElement.innerHTML} Moves: ${moves} Rating: ${rating}! do you want to play again?`)) {
+         restarting();
+     }  
 }
-
-const restart = document.querySelector('.restart')
-restart.addEventListener('click',function(){
-    moves = 0;
-    movesElement.innerHTML = 0;
-    deckContainer.innerHTML = "";
-    start();
-    timerElement.innerHTML = "00:00";
-    openCardsArray = [];
-    shuffle(deck);
-})
-
-let timerElement = document.querySelector('.timer');
 
 function timer() {
     let minutes = 0;
@@ -139,10 +140,27 @@ function timer() {
             minutes += 1;
             seconds = 0;
         }
-
         seconds = seconds < 10 ? "0" + seconds : seconds;
         minutes = minutes < 10 ? "0" + minutes : minutes;
 
         timerElement.innerHTML = minutes + ":" + seconds;
     }, 1000);
+}
+
+const restart = document.querySelector('.restart')
+restart.addEventListener('click',restarting)
+
+function restarting(){
+    moves = 0;
+    rating = "3 Stars";
+    starRating.innerHTML=`<li><i class='fa fa-star'></i></li>
+    <li><i class='fa fa-star'></i></li>
+    <li><i class="fa fa-star"></i></li>`;
+    movesElement.innerHTML = 0;
+    deckContainer.innerHTML = "";
+    clearInterval(time);
+    start();
+    timerElement.innerHTML = "00:00";
+    openCardsArray = [];
+    shuffle(deck);
 }
